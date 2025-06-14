@@ -16,7 +16,7 @@ PORT = int(os.getenv("PORT", 10000))
 IMG_FILENAME = "poetry.png"
 FONT_PATH = os.path.join("fonts", "JetBrainsMono-Italic-VariableFont_wght.ttf")
 
-CAPTION = "Code is 😊 #cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife"
+CAPTION = "Code is 😊 \n\n\n  \n \n \n \n \n \n \n \n \n \n \n \n #cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife"
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app"], methods=["GET", "POST", "OPTIONS"])
@@ -50,7 +50,7 @@ def draw_code_line(draw, x, y, parts, font):
         draw.text((x, y), text, font=font, fill=color)
         x += draw.textlength(text, font=font)
 
-def generate_poetry_image(line1, line2, line3, output_path=IMG_FILENAME):
+def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1080
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
@@ -62,10 +62,10 @@ def generate_poetry_image(line1, line2, line3, output_path=IMG_FILENAME):
         y = start_y + i * spacing
         draw_code_line(draw, x_start, y, parts, font)
 
-    # Watermark
-    wm = "#poetic_coder"
+    # Watermark - use custom or default
+    watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
-    draw.text((width - draw.textlength(wm, wm_font) - 30, height - 90), wm, font=wm_font, fill=(200, 200, 200))
+    draw.text((width - draw.textlength(watermark, wm_font) - 30, height - 90), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
 
@@ -99,7 +99,7 @@ def poetry_api():
     if not data:
         return jsonify({"error": "Invalid or missing JSON body"}), 400
 
-    # Accept both `text` or line1/line2/line3
+    # Support both 'text' and line1/line2/line3
     if "text" in data:
         lines = [line.strip() for line in re.split(r"[,\n]", data["text"]) if line.strip()]
     else:
@@ -108,7 +108,9 @@ def poetry_api():
     lines = (lines + ["", "", ""])[:3]
     l1, l2, l3 = lines
 
-    generate_poetry_image(l1, l2, l3)
+    author = data.get("author", "").strip()
+
+    generate_poetry_image(l1, l2, l3, author=author)
     time.sleep(1)
 
     base_url = request.host_url.rstrip('/')
