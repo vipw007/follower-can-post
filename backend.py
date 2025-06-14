@@ -1,13 +1,11 @@
 import os
-import zipfile
+import re
+import time
 import requests
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-
-from flask import Flask, request, send_file, jsonify
-from pyngrok import ngrok
 from PIL import Image, ImageDraw, ImageFont
-import time, re
 
 # Load environment variables
 load_dotenv()
@@ -17,19 +15,19 @@ ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 IG_USER_ID = os.getenv("IG_USER_ID")
 PUBLIC_URL = os.getenv("PUBLIC_URL")
 PORT = int(os.getenv("PORT", 10000))
-NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN")
 
+# Constants
 CAPTION = "Code is 😊 #cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife"
-
 FONT_PATH = "fonts/JetBrainsMono-Italic-VariableFont_wght.ttf"
-IMG_PATH = "poetry.png"
+STATIC_PATH = "static"
+IMG_FILENAME = "poetry.png"
+IMG_PATH = os.path.join(STATIC_PATH, IMG_FILENAME)
 
-# Set ngrok token (optional, only for local testing)
-if NGROK_AUTH_TOKEN:
-    ngrok.set_auth_token(NGROK_AUTH_TOKEN)
+# Ensure static directory exists
+os.makedirs(STATIC_PATH, exist_ok=True)
 
-# Flask app setup
-app = Flask(__name__)
+# Setup Flask app
+app = Flask(__name__, static_url_path="/static")
 CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app"], methods=["GET", "POST", "OPTIONS"])
 
 
@@ -73,7 +71,7 @@ def generate_poetry_image(line1, line2, line3, output_path=IMG_PATH):
     for i, parts in enumerate(code_lines):
         y = start_y + i * spacing
         draw_code_line(draw, x_start, y, parts, font)
-    # Add watermark
+    # Watermark
     wm = "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
     draw.text((width - draw.textlength(wm, wm_font) - 30, height - 90), wm, font=wm_font, fill=(200, 200, 200))
@@ -81,16 +79,27 @@ def generate_poetry_image(line1, line2, line3, output_path=IMG_PATH):
 
 
 def post_to_instagram(image_url):
+    # Step 1: create media
     creation_resp = requests.post(
         f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media",
-        data={'image_url': image_url, 'caption': CAPTION, 'access_token': ACCESS_TOKEN}
+        data={
+            'image_url': image_url,
+            'caption': CAPTION,
+            'access_token': ACCESS_TOKEN
+        }
     )
     if creation_resp.status_code != 200:
         return f"Media creation failed: {creation_resp.json()}"
+
     creation_id = creation_resp.json().get("id")
+
+    # Step 2: publish media
     publish_resp = requests.post(
         f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media_publish",
-        data={'creation_id': creation_id, 'access_token': ACCESS_TOKEN}
+        data={
+            'creation_id': creation_id,
+            'access_token': ACCESS_TOKEN
+        }
     )
     return "🎉 Posted!" if publish_resp.status_code == 200 else f"Publish failed: {publish_resp.json()}"
 
@@ -102,27 +111,29 @@ def poetry_api():
 
     data = request.get_json()
 
-    # Flexible input: support "text" or line1/2/3
+    # Accept both single text and 3-line input
     if "text" in data:
-        # Allow splitting by \n or ,
         lines = [line.strip() for line in re.split(r"[,\n]", data.get("text", "")) if line.strip()]
     else:
         lines = [data.get(f"line{i}", "").strip() for i in range(1, 4)]
 
-    # Ensure up to 3 lines
+    # Ensure max 3 lines
     lines = (lines + ["", "", ""])[:3]
     l1, l2, l3 = lines
 
+    # Generate image
     generate_poetry_image(l1, l2, l3)
     time.sleep(1)
-    image_url = f"{PUBLIC_URL}/poetry.png"
+
+    image_url = f"{PUBLIC_URL}/static/{IMG_FILENAME}"
     result = post_to_instagram(image_url)
     return jsonify({"image_url": image_url, "status": result})
 
 
-@app.route("/poetry.png")
-def serve_image():
-    return send_file(IMG_PATH, mimetype='image/png')
+# Optional health check
+@app.route("/")
+def index():
+    return "Server running."
 
 
 if __name__ == "__main__":
