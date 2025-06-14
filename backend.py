@@ -19,14 +19,14 @@ FONT_PATH = os.path.join("fonts", "JetBrainsMono-Italic-VariableFont_wght.ttf")
 CAPTION = "Code is 😊 \n\n\n  \n \n \n \n \n \n \n \n \n \n \n \n #cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife"
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app"], methods=["GET", "POST", "OPTIONS"])
+CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app", "https://poet-code.vercel.app"], methods=["GET", "POST", "OPTIONS"])
 
 # --- Helper Functions ---
 
 def style_code_line(code):
     token_pattern = r'"[^"]*"|\'[^\']*\'|\w+|[^\w\s]'
     tokens = re.findall(token_pattern, code)
-    parts = []
+    parts = []    
     keywords = {'if', 'else', 'return', 'function', 'for', 'while', 'const', 'let', 'var'}
     for i, token in enumerate(tokens):
         if token in keywords:
