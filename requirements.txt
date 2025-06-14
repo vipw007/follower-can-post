@@ -1,2 +1,6 @@
-flask
+Flask
 flask-cors
+requests
+python-dotenv
+Pillow
+pyngrok
