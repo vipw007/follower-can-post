@@ -19,10 +19,7 @@ PUBLIC_URL = os.getenv("PUBLIC_URL")
 PORT = int(os.getenv("PORT", 10000))
 NGROK_AUTH_TOKEN = os.getenv("NGROK_AUTH_TOKEN")
 
-CAPTION = """Code is 😊
-
-#cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife
-"""
+CAPTION = "Code is 😊 #cybersecurity #hacking #bugbounty #linux #infosec #tech #codepoetry #CodingMeme #FullStackDev #code #TechInstagram #js #ProgrammerLife"
 
 FONT_PATH = "fonts/JetBrainsMono-Italic-VariableFont_wght.ttf"
 IMG_PATH = "poetry.png"
