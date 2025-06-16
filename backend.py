@@ -57,7 +57,7 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
     font = ImageFont.truetype(FONT_PATH, 38)
 
     code_lines = [style_code_line(line) for line in [line1, line2, line3] if line]
-    spacing, start_y, x_start = 70, 280, 60
+    spacing, start_y, x_start = 80, 320, 60  # Adjust as desired
     for i, parts in enumerate(code_lines):
         y = start_y + i * spacing
         draw_code_line(draw, x_start, y, parts, font)
