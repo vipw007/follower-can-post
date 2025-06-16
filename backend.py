@@ -51,7 +51,7 @@ def draw_code_line(draw, x, y, parts, font):
         x += draw.textlength(text, font=font)
 
 def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILENAME):
-    width, height = 1080, 1080
+    width, height = 1080, 1350
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(FONT_PATH, 38)
