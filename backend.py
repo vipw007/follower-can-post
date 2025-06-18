@@ -55,16 +55,16 @@ def draw_code_line(draw, x, y, parts, font):
 
 # --- Image Generator ---
 
-def generate_poetry_image(l1, l2, l3, l4="", l5="", author=None, output_path=IMG_FILENAME):
+def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1350
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(FONT_PATH, 42)
 
     # Prepare lines
-    code_lines = [style_code_line(line) for line in [l1, l2, l3, l4, l5] if line]
+    code_lines = [style_code_line(line) for line in [line1, line2, line3, line4, line5] if line]
     spacing = 75
-    padding_x, padding_y = 60, 60
+    padding_x, padding_y = 80, 60  # Slightly increased padding_x
     line_heights = len(code_lines) * spacing
 
     # Measure card size
@@ -72,7 +72,8 @@ def generate_poetry_image(l1, l2, l3, l4="", l5="", author=None, output_path=IMG
         [draw.textlength("".join([text for text, _ in line]), font=font) for line in code_lines],
         default=0
     )
-    card_width = int(longest_line + padding_x * 2)
+    max_card_width = width - 200  # Prevents card touching screen edges
+    card_width = min(int(longest_line + padding_x * 2), max_card_width)
     card_height = int(line_heights + padding_y * 2)
 
     # Center card position
@@ -95,14 +96,14 @@ def generate_poetry_image(l1, l2, l3, l4="", l5="", author=None, output_path=IMG
         fill=(50, 52, 70)
     )
 
-    # Draw code lines
+    # Draw code lines centered in the card
     for i, parts in enumerate(code_lines):
         total_line_width = sum(draw.textlength(text, font=font) for text, _ in parts)
         x_start = card_x + (card_width - total_line_width) // 2
         y = card_y + padding_y + i * spacing
         draw_code_line(draw, x_start, y, parts, font)
 
-    # Draw watermark
+    # Watermark
     watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
     wm_x = width - draw.textlength(watermark, font=wm_font) - 30
