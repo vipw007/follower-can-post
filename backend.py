@@ -79,7 +79,7 @@ def draw_code_line(draw, x, y, parts, font):
 def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1350
     strip_height = 40
-    padding_x, padding_y = 30, 30
+    padding_x, padding_y = 50, 50
     spacing = 90
 
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
