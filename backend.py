@@ -7,7 +7,7 @@ from flask_cors import CORS
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 
-#Load .env environment variables
+# Load .env environment variables
 load_dotenv()
 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
@@ -21,34 +21,31 @@ CAPTION = "Code is 😊 \n\n\n  \n \n \n \n \n \n \n \n \n \n \n \n #cybersecuri
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app", "https://poet-code.vercel.app"], methods=["GET", "POST", "OPTIONS"])
 
-# --- Helper Functions ---
+# --- Code Styling ---
 
 def style_code_line(code):
-    # Tokenize preserving strings, words, symbols, and whitespace
     token_pattern = r'".*?"|\'.*?\'|\b\w+\b|[^\w\s]|\s+'
     tokens = re.findall(token_pattern, code)
     parts = []
-    
+
     keywords = {'if', 'else', 'return', 'function', 'for', 'while', 'const', 'let', 'var', 'throw', 'new'}
-    
     for i, token in enumerate(tokens):
         if token.isspace():
-            parts.append((token, "#ffffff"))  # Preserve spaces/indents
+            parts.append((token, "#ffffff"))
         elif token in keywords:
-            parts.append((token, "#8be9fd"))  # keyword
+            parts.append((token, "#8be9fd"))
         elif token == '.':
-            parts.append((token, "#ff79c6"))  # dot operator
+            parts.append((token, "#ff79c6"))
         elif i > 0 and tokens[i - 1] == '.':
-            parts.append((token, "#f1fa8c"))  # method/property
+            parts.append((token, "#f1fa8c"))
         elif token.startswith('"') or token.startswith("'"):
-            parts.append((token, "#50fa7b"))  # string
+            parts.append((token, "#50fa7b"))
         elif re.match(r'^\d+$', token):
-            parts.append((token, "#bd93f9"))  # number
+            parts.append((token, "#bd93f9"))
         elif token in {'(', ')', ';', '=', '=>', ','}:
-            parts.append((token, "#ffffff"))  # basic symbol
+            parts.append((token, "#ffffff"))
         else:
-            parts.append((token, "#ff79c6"))  # other (e.g., variables)
-    
+            parts.append((token, "#ff79c6"))
     return parts
 
 def draw_code_line(draw, x, y, parts, font):
@@ -56,14 +53,16 @@ def draw_code_line(draw, x, y, parts, font):
         draw.text((x, y), text, font=font, fill=color)
         x += draw.textlength(text, font=font)
 
-def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILENAME):
+# --- Image Generator ---
+
+def generate_poetry_image(l1, l2, l3, l4="", l5="", author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1350
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(FONT_PATH, 42)
 
     # Prepare lines
-    code_lines = [style_code_line(line) for line in [line1, line2, line3] if line]
+    code_lines = [style_code_line(line) for line in [l1, l2, l3, l4, l5] if line]
     spacing = 75
     padding_x, padding_y = 60, 60
     line_heights = len(code_lines) * spacing
@@ -96,7 +95,7 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
         fill=(50, 52, 70)
     )
 
-    # Draw code lines centered in the card
+    # Draw code lines
     for i, parts in enumerate(code_lines):
         total_line_width = sum(draw.textlength(text, font=font) for text, _ in parts)
         x_start = card_x + (card_width - total_line_width) // 2
@@ -111,7 +110,9 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
     draw.text((wm_x, wm_y), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
-    
+
+# --- Instagram API ---
+
 def post_to_instagram(image_url):
     create_resp = requests.post(
         f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media",
@@ -135,38 +136,37 @@ def post_to_instagram(image_url):
 
 @app.route("/poetry", methods=["POST", "OPTIONS"])
 def poetry_api():
-    if request.method == "OPTIONS":
-        return "", 200
+    try:
+        if request.method == "OPTIONS":
+            return "", 200
 
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid or missing JSON body"}), 400
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid or missing JSON body"}), 400
 
-    # Support both 'text' and line1/line2/line3
-    if "text" in data:
-        lines = [line.strip() for line in re.split(r"[,\n]", data["text"]) if line.strip()]
-    else:
-        lines = [data.get(f"line{i}", "").strip() for i in range(1, 4)]
+        if "text" in data:
+            lines = [line.strip() for line in re.split(r"[,\n]", data["text"]) if line.strip()]
+        else:
+            lines = [data.get(f"line{i}", "").strip() for i in range(1, 6)]  # Up to 5
 
-    lines = (lines + ["", "", "", "", ""])[:5]  # Previously was 3
-    l1, l2, l3 = lines
+        lines = (lines + [""] * 5)[:5]
+        l1, l2, l3, l4, l5 = lines
+        author = data.get("author", "").strip()
 
-    author = data.get("author", "").strip()
+        generate_poetry_image(l1, l2, l3, l4, l5, author=author)
 
-    generate_poetry_image(l1, l2, l3, author=author)
-    time.sleep(1)
+        time.sleep(1)
+        base_url = request.host_url.rstrip('/')
+        image_url = f"{base_url}/{IMG_FILENAME}"
+        result = post_to_instagram(image_url)
+        return jsonify({"image_url": image_url, "status": result})
 
-    base_url = request.host_url.rstrip('/')
-    image_url = f"{base_url}/{IMG_FILENAME}"
-
-    result = post_to_instagram(image_url)
-    return jsonify({"image_url": image_url, "status": result})
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route(f"/{IMG_FILENAME}")
 def serve_image():
     return send_file(IMG_FILENAME, mimetype='image/png')
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
