@@ -54,58 +54,55 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
     width, height = 1080, 1350
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(FONT_PATH, 38)
+    font = ImageFont.truetype(FONT_PATH, 42)
 
-    # Style the 3 lines
+    # Prepare lines
     code_lines = [style_code_line(line) for line in [line1, line2, line3] if line]
+    spacing = 75
+    padding_x, padding_y = 60, 60
+    line_heights = len(code_lines) * spacing
 
-    # Layout values
-    spacing, start_y = 90, 700
-    padding_x = 40
-    padding_y = 25
-    border_radius = 20
-    card_fill = (55, 58, 75)
-    card_outline = (100, 100, 120)
-    shadow_offset = 5
-    shadow_color = (20, 20, 30)
+    # Measure card size
+    longest_line = max(
+        [draw.textlength("".join([text for text, _ in line]), font=font) for line in code_lines],
+        default=0
+    )
+    card_width = int(longest_line + padding_x * 2)
+    card_height = int(line_heights + padding_y * 2)
 
+    # Center card position
+    card_x = (width - card_width) // 2
+    card_y = (height - card_height) // 2
+
+    # Draw shadow
+    shadow_offset = 10
+    shadow_color = (30, 30, 30)
+    draw.rounded_rectangle(
+        [card_x + shadow_offset, card_y + shadow_offset, card_x + card_width + shadow_offset, card_y + card_height + shadow_offset],
+        radius=30,
+        fill=shadow_color
+    )
+
+    # Draw card
+    draw.rounded_rectangle(
+        [card_x, card_y, card_x + card_width, card_y + card_height],
+        radius=30,
+        fill=(50, 52, 70)
+    )
+
+    # Draw code lines centered in the card
     for i, parts in enumerate(code_lines):
-        y = start_y + i * spacing
-        line_text = ''.join([text for text, _ in parts])
-        text_width = draw.textlength(line_text, font=font)
-        text_height = font.getbbox(line_text)[3]
+        total_line_width = sum(draw.textlength(text, font=font) for text, _ in parts)
+        x_start = card_x + (card_width - total_line_width) // 2
+        y = card_y + padding_y + i * spacing
+        draw_code_line(draw, x_start, y, parts, font)
 
-        # Centered X coordinate
-        x_center = (width - text_width) // 2
-        box_x0 = x_center - padding_x
-        box_y0 = y - padding_y
-        box_x1 = x_center + text_width + padding_x
-        box_y1 = y + text_height + padding_y // 2
-
-        # Shadow
-        draw.rounded_rectangle(
-            [box_x0 + shadow_offset, box_y0 + shadow_offset,
-             box_x1 + shadow_offset, box_y1 + shadow_offset],
-            radius=border_radius,
-            fill=shadow_color
-        )
-
-        # Card background
-        draw.rounded_rectangle(
-            [box_x0, box_y0, box_x1, box_y1],
-            radius=border_radius,
-            fill=card_fill,
-            outline=card_outline,
-            width=2
-        )
-
-        # Colored text
-        draw_code_line(draw, x_center, y, parts, font)
-
-    # Watermark at bottom right
+    # Draw watermark
     watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
-    draw.text((width - draw.textlength(watermark, wm_font) - 30, height - 90), watermark, font=wm_font, fill=(200, 200, 200))
+    wm_x = width - draw.textlength(watermark, font=wm_font) - 30
+    wm_y = height - 90
+    draw.text((wm_x, wm_y), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
 
