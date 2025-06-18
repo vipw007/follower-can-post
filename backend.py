@@ -75,14 +75,17 @@ def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=No
     padding_x, padding_y = 80, 60  # Slightly increased padding_x
     line_heights = len(code_lines) * spacing
 
-    # Measure card size
+     # Measure card size
     longest_line = max(
         [draw.textlength("".join([text for text, _ in line]), font=font) for line in code_lines],
         default=0
     )
-    max_card_width = width - 200  # Prevents card touching screen edges
+    max_card_width = width - 120  # Avoid touching screen edges
     card_width = min(int(longest_line + padding_x * 2), max_card_width)
-    card_height = int(line_heights + padding_y * 2)
+    
+    strip_height = 40
+    card_height = int(line_heights + padding_y * 2 + strip_height)
+
 
     # Center card position
     card_x = (width - card_width) // 2
@@ -103,7 +106,7 @@ def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=No
         radius=30,
         fill=(50, 52, 70)
     )
-        # Draw macOS-style top strip
+    # Draw macOS-style top strip
     strip_height = 40
     draw.rectangle(
         [card_x, card_y, card_x + card_width, card_y + strip_height],
@@ -123,6 +126,7 @@ def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=No
             fill=color
         )
         circle_x += circle_radius * 2 + circle_spacing
+
 
 
     current_y = card_y + padding_y + 60  # leave space for title strip
