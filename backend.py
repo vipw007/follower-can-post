@@ -7,7 +7,7 @@ from flask_cors import CORS
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 
-# /Load .env environment variables
+#Load .env environment variables
 load_dotenv()
 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
@@ -105,9 +105,7 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
     draw.text((wm_x, wm_y), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
-
-
-
+    
 def post_to_instagram(image_url):
     create_resp = requests.post(
         f"https://graph.facebook.com/v19.0/{IG_USER_ID}/media",
