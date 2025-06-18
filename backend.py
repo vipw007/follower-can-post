@@ -7,7 +7,7 @@ from flask_cors import CORS
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 
-# Load .env environment variables
+# /Load .env environment variables
 load_dotenv()
 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
