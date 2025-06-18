@@ -44,7 +44,7 @@ def style_code_line(code):
             parts.append((token, "#ff79c6"))
     return parts
 
-def fit_font_size(draw, text, max_width, font_path, base_size=42, min_size=28):
+def fit_font_size(draw, text, max_width, font_path, base_size=40, min_size=28):
     for size in range(base_size, min_size - 1, -1):
         font = ImageFont.truetype(font_path, size)
         if draw.textlength(text, font=font) <= max_width:
@@ -59,7 +59,7 @@ def draw_code_line(draw, x, y, parts, font):
 def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1350
     strip_height = 40
-    padding_x, padding_y = 70, 60
+    padding_x, padding_y = 80, 60
     spacing = 90
 
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
