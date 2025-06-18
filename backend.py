@@ -98,8 +98,7 @@ def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=No
 
     # Draw code lines centered in the card
     for i, parts in enumerate(code_lines):
-        total_line_width = sum(draw.textlength(text, font=font) for text, _ in parts)
-        x_start = card_x + (card_width - total_line_width) // 2
+        x_start = card_x + padding_x  # left align to padding_x inside card
         y = card_y + padding_y + i * spacing
         draw_code_line(draw, x_start, y, parts, font)
 
