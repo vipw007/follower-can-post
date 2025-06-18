@@ -59,7 +59,7 @@ def draw_code_line(draw, x, y, parts, font):
 def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
     width, height = 1080, 1350
     strip_height = 40
-    padding_x, padding_y = 60, 60
+    padding_x, padding_y = 70, 60
     spacing = 90
 
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
@@ -80,8 +80,9 @@ def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
         [draw.textlength("".join([text for text, _ in line]), font=fonts_per_line[i]) for i, line in enumerate(code_lines)],
         default=0
     )
-    max_card_width = width - 120
+    max_card_width = width - 100  # e.g. 980px if width is 1080
     card_width = min(int(longest_line + padding_x * 2), max_card_width)
+
     card_height = int(line_heights + padding_y * 2 + strip_height)
 
     card_x = (width - card_width) // 2
