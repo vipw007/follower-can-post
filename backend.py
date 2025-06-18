@@ -44,6 +44,26 @@ def style_code_line(code):
             parts.append((token, "#ff79c6"))
     return parts
 
+    # Initial font size
+    base_font_size = 42
+    font = ImageFont.truetype(FONT_PATH, base_font_size)
+    
+    # Determine the width of the longest line
+    longest_line_width = max(
+        [draw.textlength("".join([text for text, _ in line]), font=font) for line in code_lines],
+        default=0
+    )
+    max_card_width = width - 100  # screen edge padding
+    
+    # Scale down font size if needed
+    if longest_line_width + 160 > max_card_width:  # 160 is padding buffer
+        shrink_ratio = (max_card_width - 160) / longest_line_width
+        font_size = max(int(base_font_size * shrink_ratio), 26)  # don't go below 26
+        font = ImageFont.truetype(FONT_PATH, font_size)
+    else:
+        font_size = base_font_size
+
+
 def fit_font_size(draw, text, max_width, font_path, base_size=40, min_size=28):
     for size in range(base_size, min_size - 1, -1):
         font = ImageFont.truetype(font_path, size)
