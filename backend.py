@@ -24,25 +24,31 @@ CORS(app, origins=["http://localhost:5173", "https://vivekyadav2o.netlify.app", 
 # --- Helper Functions ---
 
 def style_code_line(code):
-    token_pattern = r'"[^"]*"|\'[^\']*\'|\w+|[^\w\s]'
+    # Tokenize preserving strings, words, symbols, and whitespace
+    token_pattern = r'".*?"|\'.*?\'|\b\w+\b|[^\w\s]|\s+'
     tokens = re.findall(token_pattern, code)
-    parts = []    
-    keywords = {'if', 'else', 'return', 'function', 'for', 'while', 'const', 'let', 'var'}
+    parts = []
+    
+    keywords = {'if', 'else', 'return', 'function', 'for', 'while', 'const', 'let', 'var', 'throw', 'new'}
+    
     for i, token in enumerate(tokens):
-        if token in keywords:
-            parts.append((token, "#8be9fd"))
+        if token.isspace():
+            parts.append((token, "#ffffff"))  # Preserve spaces/indents
+        elif token in keywords:
+            parts.append((token, "#8be9fd"))  # keyword
         elif token == '.':
-            parts.append((token, "#ff79c6"))
-        elif i > 0 and tokens[i-1] == '.':
-            parts.append((token, "#f1fa8c"))
+            parts.append((token, "#ff79c6"))  # dot operator
+        elif i > 0 and tokens[i - 1] == '.':
+            parts.append((token, "#f1fa8c"))  # method/property
         elif token.startswith('"') or token.startswith("'"):
-            parts.append((token, "#50fa7b"))
+            parts.append((token, "#50fa7b"))  # string
         elif re.match(r'^\d+$', token):
-            parts.append((token, "#bd93f9"))
+            parts.append((token, "#bd93f9"))  # number
         elif token in {'(', ')', ';', '=', '=>', ','}:
-            parts.append((token, "#ffffff"))
+            parts.append((token, "#ffffff"))  # basic symbol
         else:
-            parts.append((token, "#ff79c6"))
+            parts.append((token, "#ff79c6"))  # other (e.g., variables)
+    
     return parts
 
 def draw_code_line(draw, x, y, parts, font):
@@ -142,7 +148,7 @@ def poetry_api():
     else:
         lines = [data.get(f"line{i}", "").strip() for i in range(1, 4)]
 
-    lines = (lines + ["", "", ""])[:3]
+    lines = (lines + ["", "", "", "", ""])[:5]  # Previously was 3
     l1, l2, l3 = lines
 
     author = data.get("author", "").strip()
