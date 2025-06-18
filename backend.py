@@ -48,10 +48,18 @@ def style_code_line(code):
             parts.append((token, "#ff79c6"))
     return parts
 
-def draw_code_line(draw, x, y, parts, font):
+def draw_code_line(draw, x, y, parts, font, max_width):
+    line_x = x
+    line_y = y
     for text, color in parts:
-        draw.text((x, y), text, font=font, fill=color)
-        x += draw.textlength(text, font=font)
+        word_width = draw.textlength(text, font=font)
+        if line_x + word_width > x + max_width:
+            line_x = x  # wrap to next line
+            line_y += 60
+        draw.text((line_x, line_y), text, font=font, fill=color)
+        line_x += word_width
+    return line_y + 60  # return new y after wrapping
+
 
 # --- Image Generator ---
 
@@ -95,12 +103,34 @@ def generate_poetry_image(line1, line2, line3, line4=None, line5=None, author=No
         radius=30,
         fill=(50, 52, 70)
     )
+        # Draw macOS-style top strip
+    strip_height = 40
+    draw.rectangle(
+        [card_x, card_y, card_x + card_width, card_y + strip_height],
+        fill=(30, 32, 40)
+    )
+    
+    # Draw red, yellow, green circles
+    circle_radius = 10
+    circle_spacing = 10
+    circle_y = card_y + strip_height // 2
+    circle_x = card_x + 20
+    colors = [(255, 95, 86), (255, 189, 46), (39, 201, 63)]
+    for color in colors:
+        draw.ellipse(
+            [circle_x - circle_radius, circle_y - circle_radius,
+             circle_x + circle_radius, circle_y + circle_radius],
+            fill=color
+        )
+        circle_x += circle_radius * 2 + circle_spacing
 
-    # Draw code lines centered in the card
-    for i, parts in enumerate(code_lines):
-        x_start = card_x + padding_x  # left align to padding_x inside card
-        y = card_y + padding_y + i * spacing
-        draw_code_line(draw, x_start, y, parts, font)
+
+    current_y = card_y + padding_y + 60  # leave space for title strip
+    for parts in code_lines:
+        x_start = card_x + padding_x
+        max_line_width = card_width - padding_x * 2
+        current_y = draw_code_line(draw, x_start, current_y, parts, font, max_line_width)
+
 
     # Watermark
     watermark = f"#{author}" if author else "#poetic_coder"
