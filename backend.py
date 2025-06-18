@@ -56,55 +56,59 @@ def generate_poetry_image(line1, line2, line3, author=None, output_path=IMG_FILE
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype(FONT_PATH, 38)
 
+    # Style the 3 lines
     code_lines = [style_code_line(line) for line in [line1, line2, line3] if line]
-    spacing, start_y, x_start = 80, 450, 60  # Adjust as desired
-for i, parts in enumerate(code_lines):
-    y = start_y + i * spacing
-    line_text = ''.join([text for text, _ in parts])
-    text_width = draw.textlength(line_text, font=font)
-    text_height = font.getbbox(line_text)[3]
 
-    # Padding and style
+    # Layout values
+    spacing, start_y = 90, 700
     padding_x = 40
     padding_y = 25
     border_radius = 20
-    card_fill = (55, 58, 75)         # Dark card color
-    card_outline = (100, 100, 120)   # Subtle border
+    card_fill = (55, 58, 75)
+    card_outline = (100, 100, 120)
     shadow_offset = 5
     shadow_color = (20, 20, 30)
 
-    # Center horizontally
-    x_center = (width - text_width) // 2
-    box_x0 = x_center - padding_x
-    box_y0 = y - padding_y
-    box_x1 = x_center + text_width + padding_x
-    box_y1 = y + text_height + padding_y // 2
+    for i, parts in enumerate(code_lines):
+        y = start_y + i * spacing
+        line_text = ''.join([text for text, _ in parts])
+        text_width = draw.textlength(line_text, font=font)
+        text_height = font.getbbox(line_text)[3]
 
-    # Draw shadow
-    draw.rounded_rectangle(
-        [box_x0 + shadow_offset, box_y0 + shadow_offset,
-         box_x1 + shadow_offset, box_y1 + shadow_offset],
-        radius=border_radius,
-        fill=shadow_color
-    )
+        # Centered X coordinate
+        x_center = (width - text_width) // 2
+        box_x0 = x_center - padding_x
+        box_y0 = y - padding_y
+        box_x1 = x_center + text_width + padding_x
+        box_y1 = y + text_height + padding_y // 2
 
-    # Draw card background
-    draw.rounded_rectangle(
-        [box_x0, box_y0, box_x1, box_y1],
-        radius=border_radius,
-        fill=card_fill,
-        outline=card_outline,
-        width=2
-    )
+        # Shadow
+        draw.rounded_rectangle(
+            [box_x0 + shadow_offset, box_y0 + shadow_offset,
+             box_x1 + shadow_offset, box_y1 + shadow_offset],
+            radius=border_radius,
+            fill=shadow_color
+        )
 
-    # Draw text centered
-    draw_code_line(draw, x_center, y, parts, font)
-    # Watermark - use custom or default
+        # Card background
+        draw.rounded_rectangle(
+            [box_x0, box_y0, box_x1, box_y1],
+            radius=border_radius,
+            fill=card_fill,
+            outline=card_outline,
+            width=2
+        )
+
+        # Colored text
+        draw_code_line(draw, x_center, y, parts, font)
+
+    # Watermark at bottom right
     watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
     draw.text((width - draw.textlength(watermark, wm_font) - 30, height - 90), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
+
 
 def post_to_instagram(image_url):
     create_resp = requests.post(
