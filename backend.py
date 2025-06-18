@@ -77,10 +77,10 @@ def draw_code_line(draw, x, y, parts, font):
         x += draw.textlength(text, font=font)
 
 def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
-    width, height = 1080, 1350
+    width, height = 1080, 1080
     strip_height = 40
-    padding_x, padding_y = 80, 60
-    spacing = 90
+    padding_x, padding_y = 30, 30
+    spacing = 80
 
     img = Image.new('RGB', (width, height), color=(40, 42, 54))
     draw = ImageDraw.Draw(img)
