@@ -143,7 +143,8 @@ def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
     watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
     wm_x = width - draw.textlength(watermark, font=wm_font) - 30
-    wm_y = height - 90
+    virtual_height = 1350
+    wm_y = virtual_height - 90  # Adjust as needed
     draw.text((wm_x, wm_y), watermark, font=wm_font, fill=(200, 200, 200))
 
     img.save(output_path)
