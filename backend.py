@@ -139,13 +139,13 @@ def generate_poetry_image(*lines, author=None, output_path=IMG_FILENAME):
         y = card_y + padding_y + strip_height + i * spacing
         draw_code_line(draw, x, y, parts, font)
 
-    # Watermark
+    # Watermark placed exactly at bottom of 1350px visual area
     watermark = f"#{author}" if author else "#poetic_coder"
     wm_font = ImageFont.truetype(FONT_PATH, 30)
     wm_x = width - draw.textlength(watermark, font=wm_font) - 30
-    virtual_height = 1350
-    wm_y = virtual_height - 90  # Adjust as needed
+    wm_y = 1350 - 60  # 60px from bottom of the 1350px visible zone
     draw.text((wm_x, wm_y), watermark, font=wm_font, fill=(200, 200, 200))
+
 
     img.save(output_path)
 
